@@ -1,0 +1,97 @@
+---
+- hosts: Terra_bot,Terra_redis,Terra_web
+  become: true
+  tasks:
+    - name: Install aptitude
+      apt:
+        name: aptitude
+        state: latest
+        update_cache: true
+
+    - name: Install required system packages
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+          - virtualenv
+          - python3-setuptools
+        state: latest
+        update_cache: true
+        
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
+        
+        
+- hosts: Terra_redis
+  become: true
+  tasks:
+    - name: Pull redis Docker image
+      community.docker.docker_image:
+        name: redis:alpine
+        source: pull
+    - name: Create redisserver container
+      community.docker.docker_container:
+        name: redisserver
+        image: redis:alpine
+        state: started
+        ports:
+          - "6379:6379"
+        volumes: redis-data:/data
+            
+             
+- hosts: Terra_web
+  become: true
+  tasks:
+    - name: Pull webserver Docker image
+      community.docker.docker_image:
+        name: vladgrz/webserver:compose-web
+        source: pull
+    - name: Create webserver container
+      community.docker.docker_container:
+        name: webserver
+        image: vladgrz/webserver:compose-web
+        state: started
+        ports:
+          - "80:5000"
+        volumes: 
+          - source: ./my_app/logs
+            target: /app/logs
+            type: bind
+                
+            
+- hosts: Terra_bot
+  become: true
+  tasks:
+    - name: Pull bot Docker image
+      community.docker.docker_image:
+        name: vladgrz/citatnik_bot:compose-bot
+        source: pull
+    - name: Create bot container
+      community.docker.docker_container:
+        name: bot
+        image: vladgrz/citatnik_bot:compose-bot
+        state: started
+        ports:
+          - "8000:5000"
+        env:
+          TOKEN: "<Replace with your TOKEN>"
+          MONGO_CLIENT: "Replace with your MONGO_CLIENT"

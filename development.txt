@@ -1,0 +1,12 @@
+[controller]
+control ansible_connection=local
+
+[bot]
+Terra_bot ansible_user=ubuntu
+Terra_bot ansible_host=52.1.184.7
+[redisserver]
+Terra_redis ansible_user=ubuntu
+Terra_redis ansible_host=3.215.191.247
+[webserver]
+Terra_web ansible_user=ubuntu
+Terra_web ansible_host=52.72.71.52

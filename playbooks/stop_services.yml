@@ -1,0 +1,26 @@
+---
+- hosts: Terra_redis
+  become: true
+  tasks:
+    - name: Stop redisserver container
+      community.docker.docker_container:
+        name: redisserver
+        state: absent
+            
+             
+- hosts: Terra_web
+  become: true
+  tasks:
+    - name: Stop webserver container
+      community.docker.docker_container:
+        name: webserver
+        state: absent
+                
+            
+- hosts: Terra_bot
+  become: true
+  tasks:
+    - name: Stop bot container
+      community.docker.docker_container:
+        name: bot
+        state: absent
